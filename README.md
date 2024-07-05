@@ -48,26 +48,37 @@ rosdep update
 
 ### 2. Install ROS 2 Foxy Fitzroy
 #### Pre-installation
-first you need to set locale which which supports UTF-8  
-to check UTF-8 use the following commandn in shell 
+first, you need to set locale which supports UTF-8  
+to check UTF-8 use the following command in shell 
 ```sh
 locale 
 ```
-
-
-
-
-
-
-
-
-#### Step 1: Set up the sources list
+if you don't have UTF-8 use the following commands 
 ```sh
-sudo sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
+sudo apt update && sudo apt install locales
+sudo locale-gen en_US en_US.UTF-8
+sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
+
+locale  # verify settings
 ```
-#### Step 2: Set up the keys
+
+#### Set up sources 
+##### You will need to add the ROS 2 apt repository to your system.  
+ensure that the Ubuntu Universe repository is enabled.
 ```sh
-curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+sudo apt install software-properties-common
+sudo add-apt-repository universe
+```
+
+#### Step 1: Set up the keys
+```sh
+sudo apt update && sudo apt install curl -y
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+```
+#### Step 2: Add the repository to your sources list
+```sh
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 ```
 #### Step 3: Update your package list
 ```sh
@@ -75,18 +86,20 @@ sudo apt update
 ```
 #### Step 4: Install ROS 2 Foxy
 ```sh
-sudo apt install ros-foxy-desktop
+sudo apt install ros-foxy-desktop python3-argcomplete
 ```
-#### Step 5: Set up the environment
-Add the following line to your ~/.bashrc file:
+#### Step 5: Install development tools (Compilers and other tools to build ROS packages)
 ```sh
-echo "source /opt/ros/foxy/setup.bash" >> ~/.bashrc
-source ~/.bashrc
+sudo apt install ros-dev-tools
 ```
-#### Step 6: Install dependencies for building packages
+#### Step 6: Set up the environment
+Set up your environment by sourcing the following file.  
+Replace ".bash" with your shell if you're not using bash  
+Possible values are: setup.bash, setup.sh, setup.zsh
 ```sh
-sudo apt install python3-colcon-common-extensions
+source /opt/ros/foxy/setup.bash
 ```
+
 ### 3. Verifying the Installation
 #### Verifying ROS Noetic
 To verify your ROS Noetic installation, you can run:
@@ -96,8 +109,9 @@ roscore
 This should start the ROS master node.
 
 #### Verifying ROS 2 Foxy
-To verify your ROS 2 Foxy installation, you can run:
+To verify your ROS 2 Foxy installation, you can run a C++ talker:
 ```sh
+source /opt/ros/foxy/setup.bash
 ros2 run demo_nodes_cpp talker
 ```
 This should start a simple publisher node.
